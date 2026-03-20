@@ -15,6 +15,8 @@ Do not use it for trivial one-turn tasks or open-ended autonomy.
 - trust: `state.json` > `manifest.md` > `validation.md` > `handoff.md` > memory > chat
 - only the `owner_agent` in `state.json` runs project tasks
 - do not wait between self-clearable tasks
+- after completing a chunk and successfully updating state, immediately begin the next eligible self-clearable chunk in the same turn
+- stop only for a real blocker, approval gate, failed state update, or explicit stop condition
 - on resume, verify `state.json` against reality before executing
 - check whether output already exists before redoing work
 
@@ -63,7 +65,8 @@ Draft -> Ready -> Running -> Validating -> Running -> Done
 - never bundle unrelated operations into one command
 - docs/state updates alone do not count as execution progress unless the task is documentation-only
 - do not claim completion without concrete evidence
-- if `state.json` update fails, stop until state is repaired
+- when updating `state.json`, use a full-file write by default, not a partial edit. Partial edits are brittle on a high-churn state file
+- if `state.json` update fails, stop immediately. This is a hard stop. Do not continue, do not start another chunk, and do not claim progress until state is repaired
 - do not spend more than 2 consecutive turns in meta/planning without executing, validating, or escalating
 
 ## Progress Updates

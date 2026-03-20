@@ -17,6 +17,9 @@ Do not use for trivial one-turn work, open-ended autonomy, or projects without a
 - Other agents may improve the skill, but do not run the loop
 - Do not wait for human confirmation between self-clearable tasks
 - Keep executing until an approval gate, blocker, or stop condition is reached
+- After completing a chunk and successfully updating state, immediately begin the next eligible self-clearable chunk in the same turn
+- Do not wait for a human response between self-clearable tasks after a successful state update
+- Stop only for a real blocker, approval gate, failed state update, or explicit stop condition
 - Before starting any task, check whether the output already exists
 - If the work already landed, mark it done and advance
 - On every resume, verify `state.json` against actual reality before executing
@@ -231,9 +234,12 @@ If interrupted by unrelated work:
 - set `active_loop=false`
 - set `status=Paused` unless already `AwaitingApproval` or `Blocked`
 
+When updating `state.json`, use a full-file write by default, not a partial edit. `state.json` changes frequently and exact-match edit operations are brittle on high-churn files. Use partial edit only if you have just read the current file and the change is truly small, stable, and low-risk.
+
 If `state.json` cannot be updated:
 - stop execution immediately
-- do not continue the loop until state is repaired or successfully rewritten
+- this is a hard stop, not a soft warning
+- do not continue the loop, do not start another chunk, and do not claim progress until state is repaired or successfully rewritten
 - report the exact failure and recovery step
 
 If a task may have partially executed:
